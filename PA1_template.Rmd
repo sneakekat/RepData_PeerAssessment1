@@ -6,20 +6,161 @@ output:
 ---
 
 
+
 ## Loading and preprocessing the data
+```{r}
+library(ggplot2)
+library(dplyr)
+library(data.table)
 
+temp <- tempfile()
+download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip", temp)
+data <- read.csv(unz(temp, "activity.csv"), stringsAsFactors = FALSE)
+unlink(temp)
 
+data$date <- as.Date(data$date, format="%Y-%m-%d")
 
+```
 ## What is mean total number of steps taken per day?
 
+###First plot the steps per day by date
+
+```{r firstplot, results="markup"}
+with(data, 
+     plot(date, steps, 
+          xlab="date",
+          ylab="steps",
+          main = "Steps By Day",
+          type="h", lwd=4))
+```
+
+### Calculate the mean of steps, by date
+
+```{r}
+cdata <- na.omit(data)  #remove NAs
+origMean <- as.data.frame(tapply(cdata$steps, cdata$date, mean)) #calculate mean, by date
+setDT(origMean, keep.rownames = TRUE)[]
+colnames(origMean) <- c("date", "mean_of_steps_byDate")
+print(origMean)
+
+```
+
+### Calculate the median of steps, by date
+
+```{r}
+origMedian <- as.data.frame(tapply(cdata$steps, cdata$date, median))
+setDT(origMedian, keep.rownames = TRUE)[]
+colnames(origMedian) <- c("date", "median_of_steps_byDate")
+print(origMedian)
+```
 
 
 ## What is the average daily activity pattern?
+```{r}
+### Calculate Average Steps over Each Time Interval
+intervalData <- tapply(cdata$steps, cdata$interval, mean) #creates array of intervals and their means
+intDat <- as.data.frame(intervalData)
+namesDat <- names(intervalData) #takes names of array, sets to variable #must be a faster way to do this
+intervalCom <- cbind(namesDat, intDat)
+colnames(intervalCom) <- c("Time_Interval", "Avg_Steps_alldays")
+with(intervalCom, plot(namesDat, intervalData, 
+                       xlab="Time Intervals", 
+                       ylab="Average Steps, over all days", 
+                       type="l", 
+                       tck=1000,
+                       lwd=4, 
+                       col="blue"))
+axis(1, at = seq(0, 2400, by = 1000))
 
+```
 
+There seems to be a spike in steps in the same time interval
+
+### Which time interval gives the max amount of steps?
+```{r}
+maxsteps <- max(intervalCom$Avg_Steps_alldays)
+intervalCom[intervalCom$Avg_Steps_alldays == maxsteps, ]
+```
 
 ## Imputing missing values
+### The number of missing values in the data is below
+```{r}
+sum(is.na(data))
+```
+### Remove NA values and replace with the mean of steps by interval
+```{r}
+data2 <- data %>% group_by(interval) %>% mutate( steps= ifelse(is.na(steps), mean(steps, na.rm=TRUE), steps))
+```
 
+### Recalcuate #Steps per day & plot
+```{r}
+with(data2, 
+     plot(date, steps, 
+          xlab="date",
+          ylab="steps",
+          main = "Steps By Day, Na=Mean by Interval",
+          type="h", lwd=4))
+```
+
+### Recalculate Mean and Median
+
+```{r}
+newMean <- as.data.frame(tapply(data2$steps, data2$date, mean))
+print(newMean)
+```
+```{r}
+newMedian <- as.data.frame(tapply(data2$steps, data2$date, median))
+print(newMedian)
+
+```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+### 
+```{r}
+weekdays1 <- c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
+data2$wDay <- factor((weekdays(data2$date) %in% weekdays1), levels=c(FALSE, TRUE), labels=c('weekend', 'weekday'))
+```
+
+###Weekday Only Plot Creation
+```{r}
+weekOnly <- data2[which(data2$wDay == 'weekday'), ]
+wkMeans <- tapply(weekOnly$steps, weekOnly$interval, mean) #creates array of intervals and their means
+wkintDat <- as.data.frame(wkMeans)
+
+namesDatwk <- names(wkMeans) #takes names of array, sets to variable #must be a faster way to do this
+intervalWK <- cbind(namesDatwk, wkintDat)
+```
+
+###Weekens Only Plot Creation
+```{r}
+endOnly <- data2[which(data2$wDay == 'weekend'), ]
+wkEndMeans <- tapply(endOnly$steps, endOnly$interval, mean) #creates array of intervals and their means
+wkEndintDat <- as.data.frame(wkEndMeans)
+namesDatwkEnd <- names(wkEndMeans) #takes names of array, sets to variable #must be a faster way to do this
+intervalWKEnd <- cbind(namesDatwkEnd, wkEndintDat)
+```
+
+### Weekend & Weekday Plots
+```{r}
+par(mfrow=c(2,1))
+with(intervalWK, plot(namesDatwk, wkMeans, 
+                       xlab="Time Intervals", 
+                       ylab="Average Steps, over all days",
+                       main= "Weekdays only", 
+                       type="l", 
+                       lwd=4, 
+                       col="blue"))
+with(intervalWKEnd, plot(namesDatwkEnd, wkEndMeans, 
+                       xlab="Time Intervals", 
+                       ylab="Average Steps, over all days",
+                       main= "Weekend only", 
+                       type="l", 
+                       lwd=4, 
+                       col="red"))
+x<- c(0,500,1000,1500,2000,2500)
+axis(side=1, at=x, labels=T)
+#axis(1, at = seq(10, 2000, by = 1000))
+```
+
+### It seems there are more steps during certain time intervals on the weekends compared to the weekdays.'
