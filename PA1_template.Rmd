@@ -8,7 +8,7 @@ output:
 
 
 ## Loading and preprocessing the data
-```{r}
+```{r , results="hide"}
 library(ggplot2)
 library(dplyr)
 library(data.table)
@@ -41,7 +41,6 @@ cdata <- na.omit(data)  #remove NAs
 origMean <- as.data.frame(tapply(cdata$steps, cdata$date, mean)) #calculate mean, by date
 setDT(origMean, keep.rownames = TRUE)[]
 colnames(origMean) <- c("date", "mean_of_steps_byDate")
-print(origMean)
 
 ```
 
@@ -51,7 +50,6 @@ print(origMean)
 origMedian <- as.data.frame(tapply(cdata$steps, cdata$date, median))
 setDT(origMedian, keep.rownames = TRUE)[]
 colnames(origMedian) <- c("date", "median_of_steps_byDate")
-print(origMedian)
 ```
 
 
@@ -106,11 +104,10 @@ with(data2,
 
 ```{r}
 newMean <- as.data.frame(tapply(data2$steps, data2$date, mean))
-print(newMean)
+
 ```
 ```{r}
 newMedian <- as.data.frame(tapply(data2$steps, data2$date, median))
-print(newMedian)
 
 ```
 
@@ -132,7 +129,7 @@ namesDatwk <- names(wkMeans) #takes names of array, sets to variable #must be a 
 intervalWK <- cbind(namesDatwk, wkintDat)
 ```
 
-###Weekens Only Plot Creation
+###Weekends Only Plot Creation
 ```{r}
 endOnly <- data2[which(data2$wDay == 'weekend'), ]
 wkEndMeans <- tapply(endOnly$steps, endOnly$interval, mean) #creates array of intervals and their means
