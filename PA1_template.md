@@ -110,7 +110,7 @@ with(intervalCom, plot(namesDat, intervalData,
 axis(1, at = seq(0, 2400, by = 1000))
 ```
 
-![](PA1_template_files/figure-html/second plot-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 There seems to be a spike in steps in the same time interval
 
@@ -216,6 +216,6 @@ xyplot(steps~interval|wDay,
   main="Avg Steps, Compared By Day of Week and Time Interval")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
 ### It seems there are more steps during certain time intervals on the weekends compared to the weekdays.
 

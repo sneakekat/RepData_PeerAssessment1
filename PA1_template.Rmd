@@ -47,7 +47,7 @@ median(totalsteps)
 
 
 ## What is the average daily activity pattern?
-```{r second plot}
+```{r }
 ### Calculate Average Steps over Each Time Interval
 intervalData <- tapply(data$steps, data$interval, mean,na.rm=TRUE) #creates array of intervals and their means
 intDat <- as.data.frame(intervalData)
