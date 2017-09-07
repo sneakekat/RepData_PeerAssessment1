@@ -26,7 +26,7 @@ data$date <- as.Date(data$date, format="%Y-%m-%d")
 
 ###First Sum up the steps per  by date
 
-```{r firstplot }
+```{r }
 totalsteps <- tapply(data$steps, data$date, FUN=sum, na.rm=TRUE)
 ```
 
@@ -91,7 +91,7 @@ totalstepsNoNA <- tapply(data2$steps, data2$date, FUN=sum, na.rm=TRUE)
 
 
 ### Recalculate Mean and Median & plot Mean
-```{r  third plot}
+```{r}
 hist(totalsteps, 
      xlab ="Sum of Steps - Per Day",
      ylab = "Frequency",
